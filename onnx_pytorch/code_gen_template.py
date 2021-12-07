@@ -19,7 +19,7 @@ import torchvision
 '''
 
   @classmethod
-  def model(cls, model_init, model_forward, model_method, test_run_model):
+  def model(cls, model_init, model_signature, model_forward, model_method, test_run_model):
     return f'''{cls.autogen_head()}
 {cls.imports()}
 
@@ -35,7 +35,7 @@ class Model(nn.Module):
       self._vars[os.path.basename(b)[:-4]] = nn.Parameter(v, requires_grad=requires_grad)
     {model_init}
 
-  def forward(self, *inputs):
+  def forward(self, {model_signature}):
     {model_forward}
 
   {model_method}

@@ -80,6 +80,7 @@ class ModelCodeGenerator:
     self.embedding_conf = embedding_conf
     self.shape_infer = shape_infer
     self.init_parts = []
+    self.signature_parts = []
     self.forward_parts = []
     self.method_parts = {}
 
@@ -110,18 +111,20 @@ class ModelCodeGenerator:
         if i.name not in initializer_names
     ]
     if len(return_list) == 1:
-      self.forward_parts.append(f"{return_list[0]}, = inputs")
+      self.signature_parts.append(f"{return_list[0]}")
     else:
-      self.forward_parts.append(f"{', '.join(return_list)} = inputs")
+      self.signature_parts.append(f"{', '.join(return_list)}")
 
   def gen_model_code(self):
     return CodeGenTemplate.model(model_init='''
     '''.join(self.init_parts),
-                                 model_forward='''
+                                model_signature='''
+    '''.join(self.signature_parts),
+                                model_forward='''
     '''.join(self.forward_parts),
-                                 model_method='''
+                                model_method='''
   '''.join(self.method_parts.values()),
-                                 test_run_model=self.gen_test_run_model_code())
+                                test_run_model=self.gen_test_run_model_code())
 
   def gen_test_run_model_code(self):
     numpy_input_str = []
