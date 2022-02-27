@@ -64,7 +64,7 @@ class GatherOpCodeGenerator(OpCodeGenerator):
   def gen_method():
     return '''def gather(self, input, dim, indices, **kwargs):
     shape_l, shape_r = list(input.shape), list(indices.shape)
-    indices = indices.flatten().to(device=indices.device, dtype=torch.int64)
+    indices = indices.flatten().to(dtype=torch.int64)
     for r in range(0, dim):
       indices = indices.unsqueeze(0)
     for r in range(dim, len(shape_l) - 1):
