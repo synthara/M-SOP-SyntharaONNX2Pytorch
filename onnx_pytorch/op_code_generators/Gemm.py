@@ -22,8 +22,21 @@ class GemmOpCodeGenerator(OpCodeGenerator):
       inputs_str[1] = f"torch.transpose({inputs_str[1]}, 0, 1)"
 
     init_str, forward_str = [], []
-    forward_str.append(
-        f"{outputs_str[0]} = {attr_value_dict['alpha']} * torch.matmul({', '.join(inputs_str[:2])}) + {attr_value_dict['beta']} * {inputs_str[2]}"
-    )
 
+    if attr_value_dict['alpha'] != 1.0 and attr_value_dict['beta'] != 1.0:
+      forward_str.append(
+          f"{outputs_str[0]} = {attr_value_dict['alpha']} * torch.matmul({', '.join(inputs_str[:2])}) + {attr_value_dict['beta']} * {inputs_str[2]}"
+      )
+    elif attr_value_dict['alpha'] != 1.0 and attr_value_dict['beta'] == 1.0:
+      forward_str.append(
+          f"{outputs_str[0]} = {attr_value_dict['alpha']} * torch.matmul({', '.join(inputs_str[:2])}) + {inputs_str[2]}"
+      )
+    elif attr_value_dict['alpha'] == 1.0 and  attr_value_dict['beta'] != 1.0:
+      forward_str.append(
+          f"{outputs_str[0]} = torch.matmul({', '.join(inputs_str[:2])}) + {attr_value_dict['beta']} * {inputs_str[2]}"
+      )
+    else:
+      forward_str.append(
+          f"{outputs_str[0]} = torch.matmul({', '.join(inputs_str[:2])}) + {inputs_str[2]}"
+      )
     return {"init": init_str, "forward": forward_str}
