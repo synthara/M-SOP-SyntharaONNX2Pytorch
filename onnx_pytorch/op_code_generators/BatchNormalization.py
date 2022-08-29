@@ -39,10 +39,5 @@ class BatchNormalizationOpCodeGenerator(OpCodeGenerator):
     init_str.append(f"self.{node_name}.running_mean.data = {inputs_str[3]}")
     init_str.append(f"self.{node_name}.running_var.data = {inputs_str[4]}")
     curr_input = inputs_str[0]
-    if view:
-      forward_str.append(f"{curr_input} = torch.unsqueeze({curr_input}, -1)")
     forward_str.append(f"{outputs_str[0]} = self.{node_name}({curr_input})")
-    if view:
-      forward_str.append(
-          f"{outputs_str[0]} = torch.squeeze({outputs_str[0]}, -1)")
     return {"init": init_str, "forward": forward_str}
