@@ -48,7 +48,7 @@ class ConvOpCodeGenerator(OpCodeGenerator):
     init_str.append(f"self.{node_name} = nn.{nn_name}(**{{{params_str}}})")
     init_str.append(f"self.{node_name}.weight.data = {inputs_str[1]}")
     if len(node.input) > 2:
-      init_str.append(f"self.{node_name}.bias.data = {inputs_str[2]}")
+      init_str.append(f"self.{node_name}.bias.data = {inputs_str[2]}.float()")
 
     forward_str.append(f"{outputs_str[0]} = self.{node_name}({inputs_str[0]})")
 
