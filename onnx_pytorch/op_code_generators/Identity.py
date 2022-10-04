@@ -17,6 +17,13 @@ class IdentityOpCodeGenerator(OpCodeGenerator):
     init_str, forward_str = [], []
     nn_name = self.onnx_op
     node_name = self.rename_helper.get_node_name(node.name, node.op_type)
-    init_str.append(f"self.{node_name} = nn.{nn_name}()")
-    forward_str.append(f"{outputs_str[0]} = self.{node_name}({inputs_str[0]})")
+    
+    if node.input[0] in initializers:
+      init_str.append(f'self._vars["{outputs_str[0]}"] = {inputs_str[0]}')
+      initializers.update({
+        outputs_str[0]: initializers[node.input[0]]
+      })
+    else:
+      forward_str.append(f"{outputs_str[0]} = {inputs_str[0]}")
+
     return {"init": init_str, "forward": forward_str}
