@@ -177,7 +177,8 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
                 logging.info(f"Node name {old_name} is changed to {n.name}.")
             self.rename_helper.node_name_counter[n.name] += 1
 
-        for f in (self.onnx_model.graph.input, self.onnx_model.graph.output,
+        for f in (self.onnx_model.graph.input,
+                  self.onnx_model.graph.output,
                   self.onnx_model.graph.initializer):
             for i in f:
                 old_name = i.name
