@@ -228,10 +228,7 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
         initializers = {i.name: i for i in self.onnx_model.graph.initializer}
         input_value_infos = {i.name: i for i in self.onnx_model.graph.input}
         output_value_infos = {i.name: i for i in self.onnx_model.graph.output}
-        value_infos = {}
-        value_infos.update(input_value_infos)
-        value_infos.update(output_value_infos)
-        value_infos.update({i.name: i for i in self.onnx_model.graph.value_info})
+        value_infos = input_value_infos | output_value_infos | {i.name: i for i in self.onnx_model.graph.value_info}
 
         for i in self.onnx_model.graph.initializer:
             self.rename_helper.get_tensor_name(i.name)
@@ -241,13 +238,12 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
             op_code_gen = get_op_code_generator(n.op_type)
             self.add_attr_to_op_code_generator(op_code_gen)
             if op_code_gen is None:
-                if self.continue_on_error:
-                    self.add_forward_part(n.__repr__())
-                    logging.warning(f"OpCodeGenerator is unimplemented for {n.op_type}. "
-                                    "Please modify this part by manual later.")
-                else:
+                if not self.continue_on_error:
                     raise NotImplementedError(
                         f"OpCodeGenerator is unimplemented for {n.op_type}.")
+                self.add_forward_part(n.__repr__())
+                logging.warning(f"OpCodeGenerator is unimplemented for {n.op_type}. "
+                                "Please modify this part by manual later.")
             else:
                 try:
                     if hasattr(op_code_gen,
@@ -257,11 +253,10 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
                     self.add_init_part(gened["init"])
                     self.add_forward_part(gened["forward"])
                 except BaseException as e:
-                    if self.continue_on_error:
-                        logging.warning(e)
-                        self.add_forward_part(n.__repr__())
-                    else:
+                    if not self.continue_on_error:
                         raise e
+                    logging.warning(e)
+                    self.add_forward_part(n.__repr__())
         self.add_forward_return(self.onnx_model.graph.output)
 
         gened_code = self.gen_model_code()
