@@ -84,6 +84,7 @@ class ModelCodeGenerator:
         self.signature_parts = []
         self.forward_parts = []
         self.method_parts = {}
+        self.model_outputs = [e.name for e in onnx_model.graph.output]
 
     def add_init_part(self, m):
         if type(m) in (list, tuple, set):
@@ -229,7 +230,8 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
             "tensor_inplace": self.tensor_inplace,
             "embedding_conf": self.embedding_conf,
             'model_inputs': self.signature_parts,
-            'pretty_onnx_graph': self.pretty_onnx_graph
+            'pretty_onnx_graph': self.pretty_onnx_graph,
+            'model_outputs': self.model_outputs
         }.items():
             if hasattr(op_code_gen, k):
                 setattr(op_code_gen, k, v)

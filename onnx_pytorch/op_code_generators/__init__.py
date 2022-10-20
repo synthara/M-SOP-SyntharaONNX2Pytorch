@@ -32,6 +32,7 @@ class OpCodeGenerator:
         self.tensor_inplace = None
         self.model_inputs = None
         self.pretty_onnx_graph = None
+        self.model_outputs = None
 
         if self.schema is not None:
             self.attr_default = {}
