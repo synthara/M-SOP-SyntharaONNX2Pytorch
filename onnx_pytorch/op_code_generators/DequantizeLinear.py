@@ -23,7 +23,7 @@ class DequantizeLinearOpCodeGenerator(OpCodeGenerator):
             axis=attr_value_dict["axis"])
 
         if any("quant" in s or "weight" in s for s in [inputs_str[0], outputs_str[0]]):
-            # init_str.append(f"self.{outputs_str[0]} = {inputs_str[0]}")
+            init_str.append(f"self.{outputs_str[0]} = {inputs_str[0]}")
             initializers.update(
                 {
                     outputs_str[0]: initializers[node.input[0]]

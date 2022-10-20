@@ -30,6 +30,8 @@ class OpCodeGenerator:
         # Should inherit from ModelCodeGenerator
         self.rename_helper = None
         self.tensor_inplace = None
+        self.model_inputs = None
+        self.pretty_onnx_graph = None
 
         if self.schema is not None:
             self.attr_default = {}

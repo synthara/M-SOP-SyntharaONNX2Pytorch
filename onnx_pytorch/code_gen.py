@@ -5,6 +5,7 @@ import re
 import shutil
 from collections import Counter
 
+import networkx as nx
 import numpy as np
 import onnx
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
@@ -156,7 +157,12 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
   '''.join(test_run_model)
 
     def preprocess_onnx_model(self):
+        self.pretty_onnx_graph: nx.Graph = nx.Graph().to_directed()
         for n in self.onnx_model.graph.node:
+            for n_in in n.input:
+                self.pretty_onnx_graph.add_edge(n_in.replace(':', '_'), n.name.replace(':', '_'))
+            for n_out in n.output:
+                self.pretty_onnx_graph.add_edge(n.name.replace(':', '_'), n_out.replace(':', '_'))
             inputs, outputs = [], []
             for ls, f in ((inputs, n.input), (outputs, n.output)):
                 for i in f:
@@ -176,6 +182,8 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
             if old_name != n.name and not self.rename_helper.simplify_names:
                 logging.info(f"Node name {old_name} is changed to {n.name}.")
             self.rename_helper.node_name_counter[n.name] += 1
+
+        # nx.drawing.nx_pydot.write_dot(self.pretty_onnx_graph, 'temp.dot')
 
         for f in (self.onnx_model.graph.input,
                   self.onnx_model.graph.output,
@@ -219,7 +227,9 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
         for k, v in {
             "rename_helper": self.rename_helper,
             "tensor_inplace": self.tensor_inplace,
-            "embedding_conf": self.embedding_conf
+            "embedding_conf": self.embedding_conf,
+            'model_inputs': self.signature_parts,
+            'pretty_onnx_graph': self.pretty_onnx_graph
         }.items():
             if hasattr(op_code_gen, k):
                 setattr(op_code_gen, k, v)
@@ -234,7 +244,9 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
         for i in self.onnx_model.graph.initializer:
             self.rename_helper.get_tensor_name(i.name)
 
+        # network inputs are stored in self.signature_parts
         self.add_forward_input(self.onnx_model.graph.input)
+
         for n in self.onnx_model.graph.node:
             op_code_gen = get_op_code_generator(n.op_type)
             self.add_attr_to_op_code_generator(op_code_gen)
@@ -251,6 +263,10 @@ def test_run_model(inputs=[{', '.join(numpy_input_str)}]):''',
                                "gen_method") and n.op_type not in self.method_parts:
                         self.method_parts[n.op_type] = op_code_gen.gen_method()
                     gened = op_code_gen.gen(n, value_infos, initializers)
+                    if 'Avera' in n.name:
+                        # todo this is done for debugging, please remove it when count_include_pad:False is supported
+                        gened['init'][0] = gened['init'][0].replace("'count_include_pad': False",
+                                                                    "'count_include_pad': True")
                     self.add_init_part(gened["init"])
                     self.add_forward_part(gened["forward"])
                 except BaseException as e:
