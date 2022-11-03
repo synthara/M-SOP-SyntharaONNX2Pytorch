@@ -31,7 +31,7 @@ class GemmOpCodeGenerator(OpCodeGenerator):
       params_str = self.gen_params_str(
         out_features=weights.shape[0],
         in_features=weights.shape[1],
-        bias= True)
+        bias= len(node.input) > 2)
 
       init_str.append(f"self.{node_name} = nn.Linear(**{{{params_str}}})")
       init_str.append(f"self.{node_name}.weight.data = {inputs_str[1]}")

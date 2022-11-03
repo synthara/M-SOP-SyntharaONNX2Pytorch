@@ -28,7 +28,7 @@ class AveragePoolOpCodeGenerator(OpCodeGenerator):
         "kernel_size": attr_value_dict["kernel_shape"][:].__repr__(),
         "ceil_mode": bool(attr_value_dict["ceil_mode"]),
         "stride": attr_value_dict.get("strides", 1),
-        "count_include_pad": bool(attr_value_dict.get("count_include_pad", 0))
+        "count_include_pad": True # bool(attr_value_dict.get("count_include_pad", 1)) # NOTE This has to be removed
     }
     if "pads" in attr_value_dict:
       padding = []
