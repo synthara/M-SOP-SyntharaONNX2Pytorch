@@ -739,6 +739,13 @@ class TestBase:
     Output(ReduceSum(inputs[0], np.array((1, 2)).astype(np.int64)))
     self._run(list(zip(inputs, nps)))
 
+  def test_reduce_sum_square(self):
+    reset_model(13)
+    nps = [np.random.randn(1, 2, 3).astype(np.float32)]
+    inputs = Input(*nps)
+    Output(ReduceSumSquare(inputs[0], np.array((1, 2)).astype(np.int64)))
+    self._run(list(zip(inputs, nps)))
+
   def test_relu(self):
     reset_model(13)
     nps = [np.random.randn(1, 5).astype(np.float32)]
